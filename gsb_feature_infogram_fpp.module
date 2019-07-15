@@ -1,0 +1,75 @@
+<?php
+/**
+ * @file
+ * Code for the GSB Feature Infogram Fpp feature.
+ */
+
+include_once 'gsb_feature_infogram_fpp.features.inc';
+/**
+ * @file
+ * Code for the GSB Feature Programs List Fpp feature.
+ */
+
+include_once 'gsb_feature_programs_list_fpp.features.inc';
+
+
+function gsb_feature_infogram_fpp_entity_info_alter(&$entity_info) {
+  $entity_info['fieldable_panels_pane']['bundles']['infogram'] = array(
+    'label' => t('Infogram'),
+    'pane category' => t('Customizable Content Lists'),
+    'pane top level' => TRUE, // set to true to make this show as a top level icon
+    'admin' => array(
+      'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+      'bundle argument' => 4,
+      // Note that this has all _ replaced with - from the bundle name.
+      'real path' => 'admin/structure/fieldable-panels-panes/manage/infogram',
+      'access arguments' => array('administer fieldable panels panes'),
+    ),
+  );
+
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form().
+ */
+function gsb_feature_infogram_fpp_form_fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form' && !empty($form['#bundle']) && $form['#bundle'] == 'infogram') {
+    $form['#after_build'][] = 'gsb_feature_infogram_fpp_edit_form_alter';
+  }
+}
+
+/**
+ * Removes the reusable option
+ */
+function gsb_feature_infogram_fpp_edit_form_alter($form) {
+  unset($form['reusable']);
+  return $form;
+}
+
+/**
+ * Implements hook_fieldable_panels_pane_view().
+ */
+function gsb_feature_infogram_fpp_fieldable_panels_pane_view($entity, $view) {
+
+  if ($entity->bundle != 'infogram') {
+    return;
+  }
+
+  $code = $entity->field_infogram_embed_code["und"][0]["value"];
+
+  $data_id = $entity->field_infogram_data_id["und"][0]["value"];
+  $needle = "<data-id>";
+
+  $pos = strpos($code, $needle);
+  if ($pos) {
+    $start = $pos;
+    $end = $pos + strlen($needle);
+    $code_part1 = substr($code, 0, $start);
+    $code_part2 = substr($code, $end);
+    $entity->content["field_infogram_embed_code"][0]["#markup"] = $code_part1 . $data_id . $code_part2;
+  }
+
+  unset($entity->content["field_infogram_data_id"]);
+}
+
+
