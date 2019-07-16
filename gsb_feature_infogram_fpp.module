@@ -3,15 +3,7 @@
  * @file
  * Code for the GSB Feature Infogram Fpp feature.
  */
-
 include_once 'gsb_feature_infogram_fpp.features.inc';
-/**
- * @file
- * Code for the GSB Feature Programs List Fpp feature.
- */
-
-include_once 'gsb_feature_programs_list_fpp.features.inc';
-
 
 function gsb_feature_infogram_fpp_entity_info_alter(&$entity_info) {
   $entity_info['fieldable_panels_pane']['bundles']['infogram'] = array(
@@ -34,15 +26,17 @@ function gsb_feature_infogram_fpp_entity_info_alter(&$entity_info) {
  */
 function gsb_feature_infogram_fpp_form_fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form' && !empty($form['#bundle']) && $form['#bundle'] == 'infogram') {
+    $form['field_infogram_embed_code']['#access'] = false;
     $form['#after_build'][] = 'gsb_feature_infogram_fpp_edit_form_alter';
   }
 }
 
 /**
- * Removes the reusable option
+ * Removes the reusable and admin options
  */
 function gsb_feature_infogram_fpp_edit_form_alter($form) {
   unset($form['reusable']);
+  unset($form['admin']['#groups']['additional_settings'][0]);
   return $form;
 }
 
@@ -71,5 +65,3 @@ function gsb_feature_infogram_fpp_fieldable_panels_pane_view($entity, $view) {
 
   unset($entity->content["field_infogram_data_id"]);
 }
-
-
